@@ -15,7 +15,6 @@ class DynamicVEB:
             self.offsets.append(int(2**(2**log_offset)/2))
             self.offset_copies.append(ModVEB(u, k = self.offsets[-1]))
             log_offset *= 2
-        print(self.offsets)
 
     def member(self,x):
         new_node = Node(x)
@@ -70,10 +69,10 @@ class DynamicVEB:
         node = self.pointer
         base_pointer = node.references[0]
         base_answer = base_pointer.predecessor(new_node,x)
-        if base_answer and (self.node_set[base_answer.value].successor == None or self.node_set[base_answer.value].successor.value >= x) and base_answer.value < x:
+        if base_answer and (base_answer.successor == None or base_answer.successor.value >= x) and base_answer.value < x:
             self.pointer = base_answer
             return base_answer.value
-        
+
         #use references and ancestor pointers to climb up the tree
         for i in range(1,len(self.offset_copies)):
             base_pointer = node.references[0]
@@ -84,11 +83,11 @@ class DynamicVEB:
                 base_pointer = base_pointer.ancestor
                 offset_pointer = offset_pointer.ancestor
             base_answer = base_pointer.predecessor(new_node,x)
-            if base_answer and (self.node_set[base_answer.value].successor == None or self.node_set[base_answer.value].successor.value >= x) and base_answer.value < x:
+            if base_answer and (base_answer.successor == None or base_answer.successor.value >= x) and base_answer.value < x:
                 self.pointer = base_answer
                 return base_answer.value
             offset_answer = offset_pointer.predecessor(new_node,x+self.offsets[i])
-            if offset_answer and (self.node_set[offset_answer.value].successor == None or self.node_set[offset_answer.value].successor.value >= x) and offset_answer.value < x:
+            if offset_answer and (offset_answer.successor == None or offset_answer.successor.value >= x) and offset_answer.value < x:
                 self.pointer = offset_answer
                 return offset_answer.value
         main_base_answer = self.base.predecessor(new_node,x)
@@ -110,9 +109,11 @@ class DynamicVEB:
         node = self.pointer
         base_pointer = node.references[0]
         base_answer = base_pointer.successor(new_node,x)
-        if base_answer and (self.node_set[base_answer.value].predecessor == None or self.node_set[base_answer.value].predecessor.value <= x) and base_answer.value > x:
+        if base_answer and (base_answer.predecessor == None or base_answer.predecessor.value <= x) and base_answer.value > x:
             self.pointer = base_answer
             return base_answer.value
+
+        #use references and ancestor pointers to climb up the tree
         for i in range(1,len(self.offset_copies)):
             base_pointer = node.references[0]
             offset_pointer = node.references[self.offsets[int(i)]]
@@ -121,11 +122,11 @@ class DynamicVEB:
                     break
                 base_pointer = base_pointer.ancestor
             base_answer = base_pointer.successor(new_node,x)
-            if base_answer and (self.node_set[base_answer.value].predecessor == None or self.node_set[base_answer.value].predecessor.value <= x) and base_answer.value > x:
+            if base_answer and (base_answer.predecessor == None or base_answer.predecessor.value <= x) and base_answer.value > x:
                 self.pointer = base_answer
                 return base_answer.value
             offset_answer = offset_pointer.successor(new_node,x+self.offsets[i])
-            if offset_answer and (self.node_set[offset_answer.value].predecessor == None or self.node_set[offset_answer.value].predecessor.value <= x) and offset_answer.value > x:
+            if offset_answer and (offset_answer.predecessor == None or offset_answer.predecessor.value <= x) and offset_answer.value > x:
                 self.pointer = offset_answer
                 return offset_answer.value
         main_base_answer = self.base.successor(new_node,x)
