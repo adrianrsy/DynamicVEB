@@ -9,10 +9,8 @@ dVEB = DynamicVEB(1000000000)
 print("Constructing keyset")
 key_set = []
 for i in range(100000):
-    #key_set.append(i)
     if random.random() < 0.8:
         key_set.append(i)
-#random.shuffle(key_set)
 sorted_copy = sorted(key_set)
 
 print("Testing insert for VEB")

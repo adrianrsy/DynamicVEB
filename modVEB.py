@@ -1,7 +1,8 @@
 from VEB import VEB 
 import numpy as np
 
-#stores the entire value of an inserted value into relevant positions in the vEB instead of just relevant bits so that there is no need to travel up the tree to locate the value
+#stores the entire value of an inserted value into relevant positions in the vEB
+#also stores its locations across vEBs and its predecessor and successors within the vEB 
 class Node:
     def __init__(self,v):
         self.value = v
@@ -12,10 +13,6 @@ class Node:
         self.successor = None
 
 class ModVEB(VEB):
-    #cuts a node value to the corresponding universe size
-    def cut(self, node):
-        return node.value % u
-    
     #initialized based on parent to generate ancestor list
     def __init__(self, u, k=0, parent = None):
         self.offset = k
@@ -29,9 +26,8 @@ class ModVEB(VEB):
         if (u > 2):
             self.clusters = [None for i in range(self.high(self.u))] #modVEB trees
             self.summary = None #standard VEB tree
+        self.parent = parent 
 
-        self.parent = parent
-        
         #ancestor of 2^2^i bit universe is 2^2^{i+1} bit universe (jumping 2^i levels)
         self.ancestor = parent
         bitsize = np.log2(u)
@@ -43,7 +39,6 @@ class ModVEB(VEB):
     #returns a value node/false
     def member(self,node,x):
         x = x%self.u
-        #print(self.u)
         if x == self.min[1] and node.value == self.min[0].value:
             return self.min[0]
         elif x == self.max[1] and node.value == self.max[0].value:
@@ -64,7 +59,6 @@ class ModVEB(VEB):
         x = x%self.u
         if self.min[0] == None:
             return None
-
         if self.u <= 2:
             if x==0 and self.max[1] ==1 and self.max[0].value > node.value:
                 return self.max[0]
@@ -94,7 +88,6 @@ class ModVEB(VEB):
     def predecessor(self, node, x):
         if self.min[0] == None:
             return None
-
         x = x%self.u
         if self.u <= 2:
             if x==1 and self.min[1] ==0 and self.min[0].value < node.value:
@@ -153,7 +146,6 @@ class ModVEB(VEB):
                     self.summary.insert(h)
                     self.clusters[h].emptyInsert(node,self.low(x))
                 self.clusters[h].insert(node,self.low(x))
-        #print(self.min[0].value, self.max[0].value)
         return self.member(node,x)
 
           

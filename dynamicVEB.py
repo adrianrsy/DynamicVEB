@@ -15,6 +15,7 @@ class DynamicVEB:
             self.offsets.append(int(2**(2**log_offset)/2))
             self.offset_copies.append(ModVEB(u, k = self.offsets[-1]))
             log_offset *= 2
+        print(self.offsets)
 
     def member(self,x):
         new_node = Node(x)
@@ -62,7 +63,6 @@ class DynamicVEB:
         if self.pointer == None:
             self.pointer = offset_copies[0].predecessor(new_node,x)
             if self.pointer:
-                #print("copies_checked = N/A")
                 return self.pointer.value
             else:
                 self.pointer = None
@@ -72,8 +72,9 @@ class DynamicVEB:
         base_answer = base_pointer.predecessor(new_node,x)
         if base_answer and (self.node_set[base_answer.value].successor == None or self.node_set[base_answer.value].successor.value >= x) and base_answer.value < x:
             self.pointer = base_answer
-            #print("copies_checked = ",0)
             return base_answer.value
+        
+        #use references and ancestor pointers to climb up the tree
         for i in range(1,len(self.offset_copies)):
             base_pointer = node.references[0]
             offset_pointer = node.references[self.offsets[int(i)]]
@@ -82,23 +83,17 @@ class DynamicVEB:
                     break
                 base_pointer = base_pointer.ancestor
                 offset_pointer = offset_pointer.ancestor
-
-            #print("offset universe:",offset_pointer.u, "offset:", self.offsets[int(i)], "i:",i)
-
             base_answer = base_pointer.predecessor(new_node,x)
             if base_answer and (self.node_set[base_answer.value].successor == None or self.node_set[base_answer.value].successor.value >= x) and base_answer.value < x:
                 self.pointer = base_answer
-                #print("copies_checked = ",i, " base version")
                 return base_answer.value
             offset_answer = offset_pointer.predecessor(new_node,x+self.offsets[i])
             if offset_answer and (self.node_set[offset_answer.value].successor == None or self.node_set[offset_answer.value].successor.value >= x) and offset_answer.value < x:
                 self.pointer = offset_answer
-                #print("copies_checked = ",i, " offset verion")
                 return offset_answer.value
         main_base_answer = self.base.predecessor(new_node,x)
         if main_base_answer:
             self.pointer = main_base_answer
-            #print("copies_checked = all")
             return main_base_answer.value
         else:
             return None
@@ -108,7 +103,6 @@ class DynamicVEB:
         if self.pointer == None:
             self.pointer = offset_copies[0].successor(new_node,x)
             if self.pointer:
-                #print("copies_checked = N/A")
                 return self.pointer.value
             else:
                 self.pointer = None
@@ -118,7 +112,6 @@ class DynamicVEB:
         base_answer = base_pointer.successor(new_node,x)
         if base_answer and (self.node_set[base_answer.value].predecessor == None or self.node_set[base_answer.value].predecessor.value <= x) and base_answer.value > x:
             self.pointer = base_answer
-            #print("copies_checked = ",0)
             return base_answer.value
         for i in range(1,len(self.offset_copies)):
             base_pointer = node.references[0]
@@ -127,24 +120,17 @@ class DynamicVEB:
                 if base_pointer.ancestor == None or offset_pointer.ancestor == None:
                     break
                 base_pointer = base_pointer.ancestor
-                offset_pointer = offset_pointer.ancestor
-
-            #print("offset universe:",offset_pointer.u, "offset:", self.offsets[int(i)], "i:",i)
-
             base_answer = base_pointer.successor(new_node,x)
             if base_answer and (self.node_set[base_answer.value].predecessor == None or self.node_set[base_answer.value].predecessor.value <= x) and base_answer.value > x:
                 self.pointer = base_answer
-                #print("copies_checked = ",i, " base version")
                 return base_answer.value
             offset_answer = offset_pointer.successor(new_node,x+self.offsets[i])
             if offset_answer and (self.node_set[offset_answer.value].predecessor == None or self.node_set[offset_answer.value].predecessor.value <= x) and offset_answer.value > x:
                 self.pointer = offset_answer
-                #print("copies_checked = ",i, " offset verion")
                 return offset_answer.value
         main_base_answer = self.base.successor(new_node,x)
         if main_base_answer:
             self.pointer = main_base_answer
-            #print("copies_checked = all")
             return main_base_answer.value
         else:
             return None
